@@ -1,4 +1,12 @@
-import app from "./app.js"
+import "dotenv/config"
+import express from "express"
+import authRoute from "./src/routes/auth.route.js";
+
+const app = express();
+
+app.use(express.json())
+
+app.use("/api/auth", authRoute);
 
 const PORT = 4000
 
