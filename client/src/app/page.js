@@ -22,11 +22,10 @@ export default function Page() {
           <a href="#" className="hover:text-black">Comment ça marche</a>
           <a href="#" className="hover:text-black">Planning</a>
           <a href="#" className="hover:text-black">Rôles</a>
-          <a href="#" className="hover:text-black">FAQ</a>
         </nav>
 
         <button className="bg-black text-white px-5 py-2 rounded-full text-sm font-bold">
-          Commencer
+          sign in
         </button>
       </header>
 
