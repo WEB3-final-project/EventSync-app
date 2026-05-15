@@ -8,9 +8,11 @@ export { prisma };
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-  
+     if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
     const user = await prisma.user.findUnique({ where: { email } });
-    
+   
     if (!user || !user.password) {
         return res.status(400).json({ error: "Invalid credentials" });
     }
@@ -140,27 +142,33 @@ export const deleteUserTemporarily = async (req, res) => {
 };
 
 export const logoutUser = async (req, res) => {
-  try{
-    deleteToken(req, res);
-    res.status(200).json({ message: "Logged out successfully" });
-  }catch(error) {
-    res.status(500).json({ message: "Something went wrong" });
-  }
-}
-
-export const deleteToken = async (req, res) => {
-  const { id } = req.params; 
   try {
-    const deleteResult = await prisma.refreshToken.deleteMany({
-      where: {
-        userId: id,
+    const userId = req.user.id;
+    const refreshToken = req.cookies.refresh_token;
+
+    if (refreshToken) {
+      await prisma.refreshToken.deleteMany({
+        where: { token: refreshToken }
+      });
+    }
+
+    await prisma.refreshToken.deleteMany({
+      where: { 
+        userId: userId,
         expiresAt: { lt: new Date() }
       }
     });
-    res.clearCookie('refresh_token')
-    res.status(200).json({ message: "Token deleted successfully" });
+
+    res.clearCookie('refresh_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
+
+    return res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong" });
+    console.error(error);
+    return res.status(500).json({ message: "Something went wrong" });
   }
 };
 

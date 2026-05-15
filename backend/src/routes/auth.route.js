@@ -15,9 +15,9 @@ const authRoute = express.Router();
 authRoute.post("/signup", createUser);
 authRoute.post("/login", loginUser);
 authRoute.get("/me",authMiddleware, getUser);
-authRoute.delete("/user/:id", authMiddleware, deleteUserPermanently);
-authRoute.delete("/user/temp/:id", authMiddleware, deleteUserTemporarily);
-authRoute.delete("/logout/:id", authMiddleware, logoutUser);
-authRoute.post("/token/refresh", checkToken);
+authRoute.delete("/user", authMiddleware, deleteUserPermanently);
+authRoute.delete("/user/temp", authMiddleware, deleteUserTemporarily);
+authRoute.delete("/logout", authMiddleware, logoutUser);
+authRoute.post("/auth/refresh", checkToken);
 
 export default authRoute;

@@ -1,27 +1,20 @@
 "use client";
-
-export const login = async (formData: FormData)=> {
+import { customFetch } from "@/lib/api-client";
+export const login = async (formData)=> {
   try {
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const response = await fetch(`${process.env.API_BASE_URL}/auth/login/`, {
+    const email = formData.get("email");
+    const password = formData.get("password");
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
     const data = await response.json();
-    const accessType = "public"
     if (response.ok) {
-      localStorage.setItem("access_token", data.access);
+      localStorage.setItem("access_token", data.access_token);
       return {status:200, success: true};
     }
-    if(response.status == 404){
-      return{
-        message:"credentials not found",
-        success: false,
-        status:404
-    }
-    }return{
+    return{
       status: response.status,
       success: false,
       message: data.message || "Invalid credentials",
@@ -31,9 +24,26 @@ export const login = async (formData: FormData)=> {
   }
 };
 
-export const logout = () => {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem("access_token");
+export const logout = async() => {
+  try {
+    const response = await customFetch("/auth/logout", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      "Authorization": `Bearer ${getToken()}`,
+    });
+    const data = await response.json();
+    if (response.ok) {      
+      localStorage.removeItem("access_token");
+      return {status:204, success: true};
+    }
+    return{
+      status: response.status,
+      success: false,
+      message: data.message || "something went wrong",
+    }
+  } catch {
+    return { status: 500,success: false, message: "Can not connect to the server" };
+  }
 };
 
 export const getToken = () => {
@@ -42,25 +52,19 @@ export const getToken = () => {
 };
 
 
-export const publicRegister = async (
-  full_name: string,
-  email: string,
-  phone: string,
-  type_entite: string,
-  nif: string,
-  password: string,
+export const register = async (
+  full_name,
+  email,
+  password,
 
-): Promise<RegisterResult> => {
+)=> {
   try {
-    const response = await fetch(`${API_BASE_URL}/users/create/`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(
         { full_name,
           email,
-          phone,
-          type_entite,
-          nif,
          password }
         ),
     });
@@ -88,14 +92,8 @@ else if (result.email) {
 else if (result.password) {
   errorMessage = result.password[0];
 }
-else if (result.phone) {
-  errorMessage = result.phone[0];
-}
 else if (result.full_name) {
   errorMessage = result.full_name[0];
-}
-else if (result.type_entite) {
-  errorMessage = result.type_entite[0];
 }
     else{
       return {
@@ -112,10 +110,4 @@ else if (result.type_entite) {
   } catch {
     return {status:500, success: false, message: "Erreur de connexion au serveur" };
   }
-};
-export const isUCPDomain = (email: string): boolean => {
-  if (!email || !email.includes('@')) return false;
-  const domain = email.split('@')[1].toLowerCase();
-
-  return domain === "ucp.mg";
 };
