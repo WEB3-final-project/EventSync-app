@@ -4,7 +4,9 @@ import {
     createUser ,
     getUser ,
     deleteUserPermanently ,
-    deleteUserTemporarily
+    deleteUserTemporarily,
+    logoutUser,
+    checkToken
 
 } from '../controllers/auth.controller.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
@@ -15,5 +17,7 @@ authRoute.post("/login", loginUser);
 authRoute.get("/me",authMiddleware, getUser);
 authRoute.delete("/user/:id", authMiddleware, deleteUserPermanently);
 authRoute.delete("/user/temp/:id", authMiddleware, deleteUserTemporarily);
+authRoute.delete("/logout/:id", authMiddleware, logoutUser);
+authRoute.post("/token/refresh", checkToken);
 
 export default authRoute;
