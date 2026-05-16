@@ -47,7 +47,7 @@ export const loginUser = async (req, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000
   });
 
-    res.status(200).json({ access_token, token_type: "Bearer", expires_in });
+    res.status(200).json({ access_token, token_type: "Bearer", expires_in, role: user.role });
   } catch(error) {
     console.error(error); 
     res.status(500).json({ message: "Something went wrong" });

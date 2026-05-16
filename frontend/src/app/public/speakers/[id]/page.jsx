@@ -1,5 +1,4 @@
 "use client";
-
 import { getSpeakerProfile } from "@/lib/api/profile";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";

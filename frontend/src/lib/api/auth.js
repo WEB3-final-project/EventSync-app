@@ -12,6 +12,7 @@ export const login = async (formData)=> {
     });
     const data = await response.json();
     if (response.ok) {
+      document.cookie = `role=${data.role}; path=/`;
       localStorage.setItem("access_token", data.access_token);
       return {status:response.status, success: true};
     }
@@ -35,6 +36,7 @@ export const logout = async() => {
     });
     const data = await response.json();
     if (response.ok) {      
+      document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       localStorage.removeItem("access_token");
       return {status:response.status, success: true};
     }
