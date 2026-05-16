@@ -21,7 +21,7 @@ export const customFetch = async (url, options = {}) => {
 
   let response = await fetch(fullUrl, options);
 
-  if (response.status === 401) {
+  if (response.status === 401 || response.status === 403) {
 
     if (url.includes("/token/refresh")) return response;
 

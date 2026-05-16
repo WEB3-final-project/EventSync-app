@@ -1,11 +1,11 @@
 "use client";
 import { useState } from "react";
-import { login } from "@/services/auth";
+import { login } from "@/lib/api/auth";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
-
+  const [showPassword, setShowPassword] = useState(false);
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(null);
@@ -26,9 +26,24 @@ export default function LoginPage() {
   return (
     <form onSubmit={handleLogin}>
       {error && <p style={{ color: "red" }}>{error}</p>}
-      <input name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-      <input name="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-      <button type="submit">Login</button>
+      <label>
+        Email:
+        <input name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+      </label>
+      <label>
+        Password:
+        <input name="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <button type="button" onClick={() => setShowPassword(!showPassword)}>
+          {showPassword ? "Hide" : "Show"} Password
+        </button>
+      </label>
+      <div>
+        
+      </div>
+      <div>
+        <button type="submit">Login</button>
+        <button type="button" onClick={() => window.location.href = "/auth/register"}>Register</button>
+      </div>
     </form>
   );
 }

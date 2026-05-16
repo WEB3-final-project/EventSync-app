@@ -2,7 +2,6 @@ import express from 'express';
 import { 
     loginUser,
     createUser ,
-    getUser ,
     deleteUserPermanently ,
     deleteUserTemporarily,
     logoutUser,
@@ -10,11 +9,11 @@ import {
 
 } from '../controllers/auth.controller.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
+import { upload } from "../middlewares/upload.middleware.js";
 const authRoute = express.Router();
-    
-authRoute.post("/signup", createUser);
+
+authRoute.post("/signup", upload.single("profilePicture"), createUser);
 authRoute.post("/login", loginUser);
-authRoute.get("/me",authMiddleware, getUser);
 authRoute.delete("/user", authMiddleware, deleteUserPermanently);
 authRoute.delete("/user/temp", authMiddleware, deleteUserTemporarily);
 authRoute.delete("/logout", authMiddleware, logoutUser);

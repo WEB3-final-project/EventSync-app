@@ -1,7 +1,7 @@
 export const validateCreateUserData = (body) => {
     const { fullName, email, password } = body;
-    if (!email || !password || !fullName) {
-        return res.status(400).json({ error: "Email, password, and fullName are required" });
+    if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
       }
       if (password.length < 8) {
         return "Password too short" ;

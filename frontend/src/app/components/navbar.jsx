@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { logout,getToken } from "@/services/auth";
+import { logout,getToken } from "@/lib/api/auth";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 export default function Navbar() {

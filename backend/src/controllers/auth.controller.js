@@ -14,11 +14,11 @@ export const loginUser = async (req, res) => {
     const user = await prisma.user.findUnique({ where: { email } });
    
     if (!user || !user.password) {
-        return res.status(400).json({ error: "Invalid credentials" });
+        return res.status(400).json({ message: "Invalid credentials" });
     }
   
     const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) return res.status(400).json({ error: "Invalid credentials" });
+    if (!isValid) return res.status(400).json({ message: "Invalid credentials" });
 
     const expires_in = "15m";
     const access_token = jwt.sign(
@@ -55,11 +55,14 @@ export const loginUser = async (req, res) => {
 };
 
 export const createUser = async (req, res) => {
-  const { profilePicture, bio, fullName, externalLinks, email, password, role } = req.body;
+  const { bio, fullName, externalLinks, email, password, role } = req.body;
+  const profilePicture = req.file
+      ? `/uploads/${req.file.filename}`
+      : null;
 
   try {
     const validationError = validateCreateUserData(req.body);
-    if (validationError) return res.status(400).json({ error: validationError });
+    if (validationError) return res.status(400).json({ message: validationError });
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -81,7 +84,7 @@ export const createUser = async (req, res) => {
       });
     } 
     else {
-      return res.status(400).json({ error: "Invalid role specified" });
+      return res.status(400).json({ message: "Invalid role specified" });
     }
 
     res.status(201).json({ 
@@ -91,26 +94,11 @@ export const createUser = async (req, res) => {
 
   } catch (error) {
     if (error.code === 'P2002') {
-      res.status(400).json({ error: "Email already in use" });
+      res.status(400).json({ message: "Email already in use" });
     } else {
       console.error(error);
-      res.status(500).json({ error: "Server error during registration" });
+      res.status(500).json({ message: "Server error during registration" });
     }
-  }
-};
-
-export const getUser = async (req, res) => {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.id },
-      select: { id: true, email: true },
-    });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    res.status(200).json(user);
-  } catch (error) {
-    res.status(500).json({ message: "Something went wrong" });
   }
 };
 
@@ -174,7 +162,7 @@ export const logoutUser = async (req, res) => {
 
 export const checkToken = async (req, res) => {
   const refreshToken = req.cookies.refresh_token;
-  if (!refreshToken) return res.status(401).json({ error: "No refresh token provided" });
+  if (!refreshToken) return res.status(401).json({ message: "No refresh token provided" });
 
   try {
     const tokenInDb = await prisma.refreshToken.findUnique({
@@ -182,14 +170,14 @@ export const checkToken = async (req, res) => {
       include: { user: true }
     });
     
-    if (!tokenInDb) return res.status(403).json({ error: "Token revoked or invalid" });
+    if (!tokenInDb) return res.status(403).json({ message: "Token revoked or invalid" });
     if (tokenInDb.expiresAt < new Date()) {
       await prisma.refreshToken.delete({ where: { token: refreshToken } });
-      return res.status(403).json({ error: "Token expired" });
+      return res.status(403).json({ message: "Token expired" });
     }
 
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
-      if (err) return res.status(403).json({ error: "Invalid refresh token" });
+      if (err) return res.status(403).json({ message: "Invalid refresh token" });
       const newAccessToken = jwt.sign(
         { userId: tokenInDb.user.id, email: tokenInDb.user.email, role: tokenInDb.user.role },
         process.env.ACCESS_TOKEN_SECRET,
@@ -202,7 +190,7 @@ export const checkToken = async (req, res) => {
       });
     });
   } catch (error) {
-    return res.status(500).json({ error: "Erreur interne du serveur" });
+    return res.status(500).json({ message: "Erreur interne du serveur" });
   }
 };
 
